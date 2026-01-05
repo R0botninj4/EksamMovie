@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.geometry.Insets?>
+
+<BorderPane xmlns="http://javafx.com/javafx/21.0.6"
+            xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="GUI.MainController">
+
+    <!-- Top: Filter & Search -->
+    <top>
+        <VBox spacing="10">
+            <padding>
+                <Insets top="10" right="10" bottom="10" left="10"/>
+            </padding>
+
+            <HBox spacing="10">
+                <Label text="Search:"/>
+                <TextField fx:id="txtSearch" HBox.hgrow="ALWAYS"/>
+                <Label text="Min IMDB:"/>
+                <Spinner fx:id="spnMinRating" prefWidth="80"/>
+                <Button text="Clear Filters" onAction="#handleClearFilters"/>
+            </HBox>
+
+            <HBox spacing="10">
+                <Label text="Categories:"/>
+                <ListView fx:id="lstCategories" prefHeight="80" prefWidth="200"/>
+            </HBox>
+        </VBox>
+    </top>
+
+    <!-- Center: TableView -->
+    <center>
+        <TableView fx:id="tblMovies">
+            <columns>
+                <TableColumn fx:id="colTitle" text="Title" prefWidth="200"/>
+                <TableColumn fx:id="colImdb" text="IMDB" prefWidth="60"/>
+                <TableColumn fx:id="colPersonal" text="Personal Rating" prefWidth="100"/>
+                <TableColumn fx:id="colCategories" text="Categories" prefWidth="200"/>
+                <TableColumn fx:id="colLastViewed" text="Last Viewed" prefWidth="120"/>
+            </columns>
+        </TableView>
+    </center>
+
+    <!-- Bottom: Controls -->
+    <bottom>
+        <HBox spacing="10">
+            <padding>
+                <Insets top="10" right="10" bottom="10" left="10"/>
+            </padding>
+
+            <Button text="Add Movie" onAction="#handleAddMovie"/>
+            <Button text="Remove Movie" onAction="#handleRemoveMovie"/>
+            <Button text="Play Movie" onAction="#handlePlayMovie"/>
+            <Label text="Personal Rating:"/>
+            <Slider fx:id="sldPersonalRating" min="0" max="10" blockIncrement="1" majorTickUnit="1" showTickMarks="true" showTickLabels="true"/>
+            <Button text="Save Rating" onAction="#handleSaveRating"/>
+        </HBox>
+    </bottom>
+
+</BorderPane>
