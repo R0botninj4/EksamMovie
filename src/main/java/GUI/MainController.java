@@ -27,6 +27,11 @@ public class MainController {
     @FXML private TableColumn<Movie, String> colLastViewed;
     @FXML private TableColumn<Movie, String> colDirectors;
 
+    // ===== FILTER =====
+    @FXML private TextField txtSearch;
+    @FXML private Spinner<Integer> spnMinRating;
+    @FXML private ListView<Category> lstCategories;
+
     // ===== ADD / EDIT =====
     @FXML private TextField txtTitle;
     @FXML private TextField txtDirectors;
@@ -43,6 +48,8 @@ public class MainController {
 
     private File selectedMovieFile;
     private Movie movieBeingEdited = null;
+    private List<Movie> cachedMovies;
+
 
     // =====================================================
     @FXML
@@ -56,14 +63,27 @@ public class MainController {
                 new SpinnerValueFactory.IntegerSpinnerValueFactory(0, 10, 5)
         );
 
-        // ----- Categories (checkboxes) -----
+        spnMinRating.setValueFactory(
+                new SpinnerValueFactory.IntegerSpinnerValueFactory(0, 10, 0)
+        );
+
+        // ----- Categories (ADD) -----
         lstAddCategories.setItems(
                 FXCollections.observableArrayList(categoryDAO.getAllCategories())
         );
 
-        lstAddCategories.setCellFactory(CheckBoxListCell.forListView(
-                Category::selectedProperty
-        ));
+        lstAddCategories.setCellFactory(
+                CheckBoxListCell.forListView(Category::selectedProperty)
+        );
+
+        // ----- Categories (FILTER) -----
+        lstCategories.setItems(
+                FXCollections.observableArrayList(categoryDAO.getAllCategories())
+        );
+
+        lstCategories.setCellFactory(
+                CheckBoxListCell.forListView(Category::selectedProperty)
+        );
 
         // ----- Table bindings -----
         colTitle.setCellValueFactory(d ->
@@ -83,7 +103,7 @@ public class MainController {
             String text = (cats == null || cats.isEmpty())
                     ? ""
                     : cats.stream().map(Category::getName)
-                    .reduce((a,b) -> a + ", " + b).orElse("");
+                    .reduce((a, b) -> a + ", " + b).orElse("");
             return new SimpleStringProperty(text);
         });
 
@@ -99,18 +119,57 @@ public class MainController {
                 new SimpleStringProperty(d.getValue().getDirectors())
         );
 
+        // ----- Live filtering -----
+        txtSearch.textProperty().addListener((obs, o, n) -> applyFilters());
+        spnMinRating.valueProperty().addListener((obs, o, n) -> applyFilters());
+
+        lstCategories.getItems().forEach(c ->
+                c.selectedProperty().addListener((obs, o, n) -> applyFilters())
+        );
+
         loadMovies();
     }
 
     // =====================================================
     private void loadMovies() {
-        List<Movie> movies = movieManager.getAllMovies();
 
-        for (Movie m : movies) {
+        cachedMovies = movieManager.getAllMovies();
+
+        for (Movie m : cachedMovies) {
             m.setCategories(movieManager.getCategoriesForMovie(m));
         }
 
-        tblMovies.setItems(FXCollections.observableArrayList(movies));
+        tblMovies.setItems(FXCollections.observableArrayList(cachedMovies));
+    }
+
+
+    // =====================================================
+    private void applyFilters() {
+
+        String searchText = txtSearch.getText();
+        int minImdb = spnMinRating.getValue();
+
+        List<Category> selectedCategories = lstCategories.getItems().stream()
+                .filter(Category::isSelected)
+                .toList();
+
+        List<Movie> filtered = movieManager.searchMovies(
+                cachedMovies,
+                searchText,
+                minImdb,
+                selectedCategories
+        );
+
+        tblMovies.setItems(FXCollections.observableArrayList(filtered));
+    }
+
+    // =====================================================
+    @FXML
+    private void handleClearFilters() {
+        txtSearch.clear();
+        spnMinRating.getValueFactory().setValue(0);
+        lstCategories.getItems().forEach(c -> c.setSelected(false));
+        loadMovies();
     }
 
     // =====================================================
@@ -137,7 +196,7 @@ public class MainController {
                 .toList();
 
         if (movieBeingEdited == null) {
-            // ===== ADD =====
+
             if (selectedMovieFile == null) return;
 
             Movie movie = new Movie(
@@ -155,7 +214,7 @@ public class MainController {
             movieManager.addMovie(movie, selectedCategories);
 
         } else {
-            // ===== EDIT =====
+
             movieManager.updateMovie(
                     movieBeingEdited,
                     txtTitle.getText(),
@@ -230,12 +289,6 @@ public class MainController {
             );
             loadMovies();
         }
-    }
-
-    // =====================================================
-    @FXML
-    private void handleClearFilters() {
-        loadMovies();
     }
 
     // =====================================================
