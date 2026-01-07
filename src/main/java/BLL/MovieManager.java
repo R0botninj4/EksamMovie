@@ -1,32 +1,41 @@
 package BLL;
 
+import BE.Category;
 import BE.Movie;
 import DAL.MovieDAO;
 
-import java.io.IOException;
-import java.sql.SQLException;
-import java.time.LocalDate;
 import java.util.List;
 
 public class MovieManager {
 
-    private final MovieDAO movieDAO;
+    private final MovieDAO movieDAO = new MovieDAO();
 
-    public MovieManager() throws IOException {
-        movieDAO = new MovieDAO();
-    }
-
-    public List<Movie> getAllMovies() throws SQLException {
+    public List<Movie> getAllMovies() {
         return movieDAO.getAllMovies();
     }
 
-    public void updatePersonalRating(Movie movie, int rating) throws SQLException {
-        movie.setPersonalRating(rating);
-        movieDAO.updatePersonalRating(movie.getId(), rating);
+    public void addMovie(Movie movie, List<Category> categories) {
+        int movieId = movieDAO.addMovie(movie);
+
+        for (Category c : categories) {
+            movieDAO.addCategoryToMovie(movieId, c.getId());
+        }
     }
 
-    public void updateLastViewed(Movie movie) throws SQLException {
-        movie.setLastViewed(LocalDate.now());
-        movieDAO.updateLastViewed(movie.getId(), movie.getLastViewed());
+    public void deleteMovie(Movie movie) {
+        movieDAO.deleteMovie(movie.getId());
+    }
+
+    public void updatePersonalRating(Movie movie, int rating) {
+        movieDAO.updatePersonalRating(movie.getId(), rating);
+        movie.setPersonalRating(rating);
+    }
+
+    public void moviePlayed(Movie movie) {
+        movieDAO.updateLastViewed(movie.getId());
+    }
+
+    public List<Category> getCategoriesForMovie(Movie movie) {
+        return movieDAO.getCategoriesForMovie(movie.getId());
     }
 }

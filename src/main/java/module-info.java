@@ -5,6 +5,7 @@ module EksamMovie {
     requires java.sql;
     requires java.desktop;
     requires com.microsoft.sqlserver.jdbc;
+    requires javafx.media;
 
     opens GUI to javafx.fxml;
     opens BE to javafx.fxml;

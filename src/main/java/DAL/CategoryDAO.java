@@ -1,6 +1,8 @@
 package DAL;
 
 import BE.Category;
+import DAL.DB.DBConnector;
+
 import java.io.IOException;
 import java.sql.*;
 import java.util.ArrayList;
@@ -8,24 +10,37 @@ import java.util.List;
 
 public class CategoryDAO {
 
-    private final DBConnector db;
+    private final DBConnector dbConnector;
 
-    public CategoryDAO() throws IOException {
-        db = new DBConnector();
+    public CategoryDAO() {
+        try {
+            dbConnector = new DBConnector();
+        } catch (IOException e) {
+            throw new RuntimeException("Could not connect to database", e);
+        }
     }
 
-    public List<Category> getAllCategories() throws SQLException {
-        List<Category> list = new ArrayList<>();
-        String sql = "SELECT id, name FROM Category";
 
-        try (Connection c = db.getConnection();
-             Statement s = c.createStatement();
-             ResultSet rs = s.executeQuery(sql)) {
+    public List<Category> getAllCategories() {
+        List<Category> categories = new ArrayList<>();
+
+        String sql = "SELECT * FROM Category";
+
+        try (Connection conn = dbConnector.getConnection();
+             Statement stmt = conn.createStatement();
+             ResultSet rs = stmt.executeQuery(sql)) {
 
             while (rs.next()) {
-                list.add(new Category(rs.getInt("id"), rs.getString("name")));
+                categories.add(new Category(
+                        rs.getInt("id"),
+                        rs.getString("name")
+                ));
             }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
         }
-        return list;
+
+        return categories;
     }
 }

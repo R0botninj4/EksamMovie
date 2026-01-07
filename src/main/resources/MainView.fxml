@@ -8,7 +8,7 @@
             xmlns:fx="http://javafx.com/fxml/1"
             fx:controller="GUI.MainController">
 
-    <!-- Top: Filter & Search -->
+    <!-- ================= TOP: FILTER & SEARCH ================= -->
     <top>
         <VBox spacing="10">
             <padding>
@@ -30,31 +30,75 @@
         </VBox>
     </top>
 
-    <!-- Center: TableView -->
+    <!-- ================= CENTER: TABLE ================= -->
     <center>
         <TableView fx:id="tblMovies">
             <columns>
                 <TableColumn fx:id="colTitle" text="Title" prefWidth="200"/>
                 <TableColumn fx:id="colImdb" text="IMDB" prefWidth="60"/>
-                <TableColumn fx:id="colPersonal" text="Personal Rating" prefWidth="100"/>
-                <TableColumn fx:id="colCategories" text="Categories" prefWidth="200"/>
+                <TableColumn fx:id="colPersonal" text="Personal Rating" prefWidth="120"/>
+                <TableColumn fx:id="colCategories" text="Categories" prefWidth="220"/>
                 <TableColumn fx:id="colLastViewed" text="Last Viewed" prefWidth="120"/>
+                <TableColumn fx:id="colDirectors" text="Director" />
             </columns>
         </TableView>
     </center>
 
-    <!-- Bottom: Controls -->
+    <!-- ================= RIGHT: ADD MOVIE PANEL ================= -->
+    <right>
+        <VBox spacing="10" prefWidth="300">
+            <padding>
+                <Insets top="10" right="10" bottom="10" left="10"/>
+            </padding>
+
+            <Label text="Add Movie" style="-fx-font-size: 16px; -fx-font-weight: bold;"/>
+
+            <TextField fx:id="txtTitle" promptText="Movie title"/>
+            <TextField fx:id="txtDirectors" promptText="Directors"/>
+
+            <Label text="IMDB Rating"/>
+            <Spinner fx:id="spnImdbRating"/>
+
+            <Label text="Personal Rating"/>
+            <Spinner fx:id="spnPersonalRating"/>
+
+            <Label text="Categories"/>
+            <ListView fx:id="lstAddCategories" prefHeight="120"/>
+
+            <Button text="Choose movie file"
+                    onAction="#chooseMovieFile"/>
+
+            <Label fx:id="lblFilePath"
+                   text="No file selected"
+                   wrapText="true"
+                   style="-fx-text-fill: gray;"/>
+
+            <Separator/>
+
+            <Button text="Add Movie"
+                    onAction="#handleAddMovie"
+                    maxWidth="Infinity"/>
+        </VBox>
+    </right>
+
+    <!-- ================= BOTTOM: CONTROLS ================= -->
     <bottom>
         <HBox spacing="10">
             <padding>
                 <Insets top="10" right="10" bottom="10" left="10"/>
             </padding>
 
-            <Button text="Add Movie" onAction="#handleAddMovie"/>
             <Button text="Remove Movie" onAction="#handleRemoveMovie"/>
             <Button text="Play Movie" onAction="#handlePlayMovie"/>
+
             <Label text="Personal Rating:"/>
-            <Slider fx:id="sldPersonalRating" min="0" max="10" blockIncrement="1" majorTickUnit="1" showTickMarks="true" showTickLabels="true"/>
+            <Slider fx:id="sldPersonalRating"
+                    min="0" max="10"
+                    blockIncrement="1"
+                    majorTickUnit="1"
+                    showTickMarks="true"
+                    showTickLabels="true"/>
+
             <Button text="Save Rating" onAction="#handleSaveRating"/>
         </HBox>
     </bottom>
