@@ -38,4 +38,21 @@ public class MovieManager {
     public List<Category> getCategoriesForMovie(Movie movie) {
         return movieDAO.getCategoriesForMovie(movie.getId());
     }
+
+    public void updateMovie(Movie movie,
+                            String title,
+                            String directors,
+                            int imdb,
+                            int personal,
+                            List<Category> categories) {
+
+        movie.setName(title);
+        movie.setDirectors(directors);
+        movie.setImdbRating(imdb);
+        movie.setPersonalRating(personal);
+
+        movieDAO.updateMovie(movie);
+        movieDAO.updateMovieCategories(movie.getId(), categories);
+    }
+
 }

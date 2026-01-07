@@ -45,4 +45,8 @@ public class Movie {
     // Setters
     public void setCategories(List<Category> categories) { this.categories = categories; }
     public void setPersonalRating(Integer rating) { this.personalRating = rating; }
+    public void setName(String name) { this.name = name; }
+    public void setImdbRating(Integer imdbRating) { this.imdbRating = imdbRating; }
+    public void setDirectors(String directors) { this.directors = directors; }
+
 }

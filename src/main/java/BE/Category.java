@@ -21,4 +21,9 @@ public class Category {
     public BooleanProperty selectedProperty() { return selected; }
     public boolean isSelected() { return selected.get(); }
     public void setSelected(boolean selected) { this.selected.set(selected); }
+
+    @Override
+    public String toString() {
+        return name;
+    }
 }
