@@ -12,8 +12,19 @@ public class HelloApplication extends Application {
         FXMLLoader loader = new FXMLLoader(getClass().getResource("/MainView.fxml"));
         stage.setScene(new Scene(loader.load(), 1000, 600));
         stage.setTitle("Movie Collection");
+        stage.setMaximized(true);
         stage.show();
+
+        // --- GET CONTROLLER ---
+        MainController controller = loader.getController();
+
+
+        // --- SHOW WARNING ---
+        controller.loadMovies();
+        controller.showCleanupDialog(); // 🔹 Popup vises ved start
+
     }
+
 
     public static void main(String[] args) {
         launch();

@@ -15,6 +15,21 @@ import javafx.stage.FileChooser;
 import java.awt.Desktop;
 import java.io.File;
 import java.util.List;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
+import javafx.scene.control.Alert;
+import javafx.scene.control.Alert.AlertType;
+
+import java.time.LocalDate;
+import java.util.List;
+import javafx.scene.control.ButtonType;
+import javafx.scene.control.Dialog;
+import javafx.scene.control.ListView;
+import javafx.scene.layout.VBox;
+import javafx.scene.control.ButtonBar.ButtonData;
+
+import java.util.Optional;
 
 public class MainController {
 
@@ -131,7 +146,7 @@ public class MainController {
     }
 
     // =====================================================
-    private void loadMovies() {
+    public void loadMovies() {
 
         cachedMovies = movieManager.getAllMovies();
 
@@ -199,6 +214,9 @@ public class MainController {
 
             if (selectedMovieFile == null) return;
 
+            String path = saveMovieFile(selectedMovieFile);
+            if (path == null) return;
+
             Movie movie = new Movie(
                     0,
                     txtTitle.getText(),
@@ -207,7 +225,7 @@ public class MainController {
                     0,
                     txtDirectors.getText(),
                     0,
-                    selectedMovieFile.getAbsolutePath(),
+                    saveMovieFile(selectedMovieFile),
                     null
             );
 
@@ -229,6 +247,32 @@ public class MainController {
 
         clearForm();
         loadMovies();
+    }
+    private String saveMovieFile(File sourceFile) {
+
+        try {
+            Path movieDir = Path.of("C:/movies");
+
+            // Opret mappe hvis den ikke findes
+            if (!Files.exists(movieDir)) {
+                Files.createDirectories(movieDir);
+            }
+
+            Path targetPath = movieDir.resolve(sourceFile.getName());
+
+            // Kopiér fil (overskriv hvis den findes)
+            Files.copy(
+                    sourceFile.toPath(),
+                    targetPath,
+                    StandardCopyOption.REPLACE_EXISTING
+            );
+
+            return targetPath.toString();
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
     }
 
     // =====================================================
@@ -299,5 +343,62 @@ public class MainController {
         selectedMovieFile = null;
 
         lstAddCategories.getItems().forEach(c -> c.setSelected(false));
+    }
+
+    public void showCleanupDialog() {
+        LocalDate twoYearsAgo = LocalDate.now().minusYears(2);
+
+        // Find flagged movies
+        List<Movie> flaggedMovies = cachedMovies.stream()
+                .filter(m -> m.getPersonalRating() != null && m.getPersonalRating() < 6)
+                .filter(m -> m.getLastView() == null || m.getLastView().isBefore(twoYearsAgo))
+                .toList();
+
+        if (flaggedMovies.isEmpty()) return; // Ingen film at vise
+
+        // --- ListView med film ---
+        ListView<Movie> lv = new ListView<>();
+        lv.getItems().addAll(flaggedMovies);
+
+        // --- Dialog ---
+        Dialog<ButtonType> dialog = new Dialog<>();
+        dialog.setTitle("Movie Cleanup Reminder");
+        dialog.setHeaderText("Movies under rating 6 and not opened in 2+ years");
+
+        // --- Knapper ---
+        ButtonType deleteButton = new ButtonType("Delete Selected", ButtonData.OK_DONE);
+        ButtonType cancelButton = new ButtonType("Cancel", ButtonData.CANCEL_CLOSE);
+
+        dialog.getDialogPane().getButtonTypes().addAll(deleteButton, cancelButton);
+
+        // --- Layout ---
+        VBox content = new VBox(lv);
+        content.setSpacing(10);
+        dialog.getDialogPane().setContent(content);
+
+        // --- Vis dialog og vent ---
+        Optional<ButtonType> result = dialog.showAndWait();
+
+        if (result.isPresent() && result.get() == deleteButton) {
+            // Slet de valgte film
+            List<Movie> toDelete = lv.getSelectionModel().getSelectedItems();
+            if (!toDelete.isEmpty()) {
+                for (Movie m : toDelete) {
+                    deleteMovie(m);   // brug eksisterende metode
+                }
+                loadMovies(); // genindlæs tabel
+            }
+        }
+    }
+
+    public List<Movie> getAllMovies() {
+        return cachedMovies;
+    }
+    public void deleteMovie(Movie movie) {
+        if (movie != null) {
+            movieManager.deleteMovie(movie); // BLL håndterer DB sletning
+            cachedMovies.remove(movie);      // fjern fra cache
+            tblMovies.getItems().remove(movie); // fjern fra tabel
+        }
     }
 }

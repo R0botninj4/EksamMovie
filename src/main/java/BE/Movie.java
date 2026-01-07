@@ -49,4 +49,9 @@ public class Movie {
     public void setImdbRating(Integer imdbRating) { this.imdbRating = imdbRating; }
     public void setDirectors(String directors) { this.directors = directors; }
 
+
+    @Override
+    public String toString() {
+        return name + " (IMDB: " + (imdbRating != null ? imdbRating : "N/A") + ")";
+    }
 }
