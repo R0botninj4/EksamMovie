@@ -27,7 +27,7 @@ public class MovieManager {
         movieDAO.deleteMovie(movie.getId());
     }
 
-    public void updatePersonalRating(Movie movie, int rating) {
+    public void updatePersonalRating(Movie movie, double rating) {
         movieDAO.updatePersonalRating(movie.getId(), rating);
         movie.setPersonalRating(rating);
     }
@@ -43,8 +43,8 @@ public class MovieManager {
     public void updateMovie(Movie movie,
                             String title,
                             String directors,
-                            int imdb,
-                            int personal,
+                            double imdb,
+                            double personal,
                             List<Category> categories) {
 
         movie.setName(title);
@@ -60,7 +60,7 @@ public class MovieManager {
     public List<Movie> searchMovies(
             List<Movie> movies,
             String searchText,
-            int minImdb,
+            double minImdb,
             List<Category> selectedCategories) {
 
         return movies.stream()
@@ -78,7 +78,7 @@ public class MovieManager {
                 || m.getDirectors().toLowerCase().contains(lower);
     }
 
-    private boolean matchesMinImdb(Movie m, int minImdb) {
+    private boolean matchesMinImdb(Movie m, double minImdb) {
         return m.getImdbRating() != null && m.getImdbRating() >= minImdb;
     }
 

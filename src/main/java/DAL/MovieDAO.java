@@ -25,7 +25,6 @@ public class MovieDAO {
     // ===================== GET ALL MOVIES =====================
     public List<Movie> getAllMovies() {
         List<Movie> movies = new ArrayList<>();
-
         String sql = "SELECT * FROM Movie";
 
         try (Connection conn = dbConnector.getConnection();
@@ -36,8 +35,8 @@ public class MovieDAO {
                 Movie movie = new Movie(
                         rs.getInt("id"),
                         rs.getString("name"),
-                        rs.getInt("imdb_rating"),
-                        rs.getInt("personal_rating"),
+                        rs.getDouble("imdb_rating"),
+                        rs.getDouble("personal_rating"),
                         rs.getInt("duration"),
                         rs.getString("directors"),
                         rs.getInt("image_id"),
@@ -46,7 +45,6 @@ public class MovieDAO {
                                 ? rs.getDate("last_view").toLocalDate()
                                 : null
                 );
-
                 movies.add(movie);
             }
 
@@ -68,12 +66,11 @@ public class MovieDAO {
         """;
 
         try (Connection conn = dbConnector.getConnection();
-             PreparedStatement stmt =
-                     conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+             PreparedStatement stmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
 
             stmt.setString(1, movie.getName());
-            stmt.setInt(2, movie.getImdbRating());
-            stmt.setInt(3, movie.getPersonalRating());
+            stmt.setDouble(2, movie.getImdbRating());
+            stmt.setDouble(3, movie.getPersonalRating());
             stmt.setInt(4, movie.getDuration());
             stmt.setString(5, movie.getDirectors());
             stmt.setInt(6, movie.getImageId());
@@ -105,8 +102,8 @@ public class MovieDAO {
 
             stmt.setString(1, movie.getName());
             stmt.setString(2, movie.getDirectors());
-            stmt.setInt(3, movie.getImdbRating());
-            stmt.setInt(4, movie.getPersonalRating());
+            stmt.setDouble(3, movie.getImdbRating());
+            stmt.setDouble(4, movie.getPersonalRating());
             stmt.setInt(5, movie.getId());
 
             stmt.executeUpdate();
@@ -118,7 +115,6 @@ public class MovieDAO {
 
     // ===================== DELETE MOVIE =====================
     public void deleteMovie(int movieId) {
-
         String sql = "DELETE FROM Movie WHERE id = ?";
 
         try (Connection conn = dbConnector.getConnection();
@@ -133,14 +129,13 @@ public class MovieDAO {
     }
 
     // ===================== UPDATE PERSONAL RATING =====================
-    public void updatePersonalRating(int movieId, int rating) {
-
+    public void updatePersonalRating(int movieId, double rating) {
         String sql = "UPDATE Movie SET personal_rating = ? WHERE id = ?";
 
         try (Connection conn = dbConnector.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
 
-            stmt.setInt(1, rating);
+            stmt.setDouble(1, rating);
             stmt.setInt(2, movieId);
             stmt.executeUpdate();
 
@@ -151,7 +146,6 @@ public class MovieDAO {
 
     // ===================== UPDATE LAST VIEWED =====================
     public void updateLastViewed(int movieId) {
-
         String sql = "UPDATE Movie SET last_view = GETDATE() WHERE id = ?";
 
         try (Connection conn = dbConnector.getConnection();
@@ -167,7 +161,6 @@ public class MovieDAO {
 
     // ===================== ADD CATEGORY TO MOVIE =====================
     public void addCategoryToMovie(int movieId, int categoryId) {
-
         String sql = "INSERT INTO CatMovie (movie_id, category_id) VALUES (?, ?)";
 
         try (Connection conn = dbConnector.getConnection();
@@ -212,7 +205,6 @@ public class MovieDAO {
     public List<Category> getCategoriesForMovie(int movieId) {
 
         List<Category> categories = new ArrayList<>();
-
         String sql = """
             SELECT c.id, c.name
             FROM Category c

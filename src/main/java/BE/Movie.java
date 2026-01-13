@@ -7,8 +7,8 @@ public class Movie {
 
     private int id;
     private String name;
-    private Integer imdbRating;
-    private Integer personalRating;
+    private Double imdbRating;       // decimal
+    private Double personalRating;   // decimal
     private int duration;
     private String directors;
     private int imageId;
@@ -16,7 +16,8 @@ public class Movie {
     private LocalDate lastView;
     private List<Category> categories;
 
-    public Movie(int id, String name, Integer imdbRating, Integer personalRating,
+    // Constructor
+    public Movie(int id, String name, Double imdbRating, Double personalRating,
                  int duration, String directors, int imageId,
                  String filePath, LocalDate lastView) {
         this.id = id;
@@ -30,11 +31,11 @@ public class Movie {
         this.lastView = lastView;
     }
 
-    // Getters
+    // ===================== GETTERS =====================
     public int getId() { return id; }
     public String getName() { return name; }
-    public Integer getImdbRating() { return imdbRating; }
-    public Integer getPersonalRating() { return personalRating; }
+    public Double getImdbRating() { return imdbRating; }
+    public Double getPersonalRating() { return personalRating; }
     public int getDuration() { return duration; }
     public String getDirectors() { return directors; }
     public int getImageId() { return imageId; }
@@ -42,16 +43,16 @@ public class Movie {
     public LocalDate getLastView() { return lastView; }
     public List<Category> getCategories() { return categories; }
 
-    // Setters
+    // ===================== SETTERS =====================
     public void setCategories(List<Category> categories) { this.categories = categories; }
-    public void setPersonalRating(Integer rating) { this.personalRating = rating; }
+    public void setPersonalRating(Double rating) { this.personalRating = rating; }
     public void setName(String name) { this.name = name; }
-    public void setImdbRating(Integer imdbRating) { this.imdbRating = imdbRating; }
+    public void setImdbRating(Double imdbRating) { this.imdbRating = imdbRating; }
     public void setDirectors(String directors) { this.directors = directors; }
 
-
+    // ===================== OVERRIDE =====================
     @Override
     public String toString() {
-        return name + " (IMDB: " + (imdbRating != null ? imdbRating : "N/A") + ")";
+        return name + " (IMDB: " + (imdbRating != null ? String.format("%.1f", imdbRating) : "N/A") + ")";
     }
 }

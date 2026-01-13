@@ -43,6 +43,7 @@
         <TableView fx:id="tblMovies">
             <columns>
                 <TableColumn fx:id="colTitle" prefWidth="200" text="Title" />
+                <TableColumn fx:id="colDuration" prefWidth="90" text="Duration" />
                 <TableColumn fx:id="colImdb" prefWidth="60" text="IMDB" />
                 <TableColumn fx:id="colPersonal" prefWidth="120" text="Personal Rating" />
                 <TableColumn fx:id="colCategories" prefWidth="220" text="Categories" />
