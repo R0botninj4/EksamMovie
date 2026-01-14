@@ -23,6 +23,8 @@ import java.util.List;
 import java.util.Optional;
 import javafx.scene.layout.VBox;
 import javafx.scene.control.ButtonBar.ButtonData;
+import javafx.concurrent.Task;
+
 
 public class MainController {
 
@@ -155,45 +157,59 @@ public class MainController {
     // =====================================================
     @FXML
     private void handleAddMovie() {
+        if (selectedMovieFile == null) return;
+
+        Task<Integer> durationTask = new Task<>() {
+            @Override
+            protected Integer call() {
+                Media media = new Media(selectedMovieFile.toURI().toString());
+                MediaPlayer player = new MediaPlayer(media);
+                final int[] duration = {0};
+                final Object lock = new Object();
+
+                player.setOnReady(() -> {
+                    duration[0] = (int) media.getDuration().toSeconds();
+                    synchronized (lock) { lock.notify(); }
+                    player.dispose();
+                });
+
+                synchronized (lock) {
+                    try { lock.wait(); } catch (InterruptedException ignored) {}
+                }
+
+                return duration[0];
+            }
+        };
+
+        durationTask.setOnSucceeded(e -> {
+            int duration = durationTask.getValue();
+            addMovieToDB(duration);
+        });
+
+        new Thread(durationTask).start();
+    }
+
+    private void addMovieToDB(int duration) {
+        Movie movie = new Movie(
+                0,
+                txtTitle.getText(),
+                spnImdbRating.getValue(),
+                spnPersonalRating.getValue(),
+                duration,
+                txtDirectors.getText(),
+                0,
+                saveMovieFile(selectedMovieFile),
+                null
+        );
+
         List<Category> selectedCategories = lstAddCategories.getItems().stream()
-                .filter(Category::isSelected)
-                .toList();
+                .filter(Category::isSelected).toList();
 
-        if (movieBeingEdited == null) {
-            if (selectedMovieFile == null) return;
-            String path = saveMovieFile(selectedMovieFile);
-            if (path == null) return;
-            int duration = getMovieDuration(path);
-
-            Movie movie = new Movie(
-                    0,
-                    txtTitle.getText(),
-                    spnImdbRating.getValue(),
-                    spnPersonalRating.getValue(),
-                    duration,
-                    txtDirectors.getText(),
-                    0,
-                    path,
-                    null
-            );
-
-            movieManager.addMovie(movie, selectedCategories);
-
-        } else {
-            movieManager.updateMovie(
-                    movieBeingEdited,
-                    txtTitle.getText(),
-                    txtDirectors.getText(),
-                    spnImdbRating.getValue(),
-                    spnPersonalRating.getValue(),
-                    selectedCategories
-            );
-            movieBeingEdited = null;
-        }
-
+        movieManager.addMovie(movie, selectedCategories);
         clearForm();
         loadMovies();
     }
+
 
     private String saveMovieFile(File sourceFile) {
         try {
@@ -208,20 +224,6 @@ public class MainController {
         }
     }
 
-    private int getMovieDuration(String filePath) {
-        Media media = new Media(new File(filePath).toURI().toString());
-        MediaPlayer player = new MediaPlayer(media);
-        final int[] duration = {0};
-
-        player.setOnReady(() -> duration[0] = (int) player.getMedia().getDuration().toSeconds());
-
-        while (duration[0] == 0) {
-            try { Thread.sleep(10); } catch (InterruptedException ignored) {}
-        }
-
-        player.dispose();
-        return duration[0];
-    }
 
     // =====================================================
     @FXML
